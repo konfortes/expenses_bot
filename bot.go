@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/pkg/errors"
+
 	// auto load .env file
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -20,7 +22,7 @@ type Bot struct {
 func initBot() (*Bot, error) {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error creating bot instance")
 	}
 
 	bot.Debug = true
@@ -28,7 +30,7 @@ func initBot() (*Bot, error) {
 	webhookURL, _ := url.Parse(fmt.Sprintf("%s/%s", os.Getenv("WEBHOOK_URL"), bot.Token))
 	_, err = bot.SetWebhook(tgbotapi.WebhookConfig{URL: webhookURL})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error setting web hook")
 	}
 
 	info, err := bot.GetWebhookInfo()
@@ -41,7 +43,10 @@ func initBot() (*Bot, error) {
 	return &Bot{bot}, nil
 }
 
+var weatherClient WeatherClient
+
 func main() {
+	weatherClient = WeatherClient{URL: os.Getenv("WEATHER_API_URL"), Key: os.Getenv("WEATHER_API_KEY")}
 	bot, err := initBot()
 	if err != nil {
 		log.Fatal(err)
@@ -66,7 +71,7 @@ func (bot Bot) handleUpdate(update tgbotapi.Update) {
 	case "expense":
 		msg.Text = "what did you spent your money on?"
 	case "weather":
-		msg.Text = "It is 14 celsius and 60% raining"
+		msg.Text = weatherClient.current()
 	default:
 		msg.Text = "I only understand predefined commands. press the '/' button"
 	}
