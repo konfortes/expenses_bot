@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type WeatherResonse struct {
+type CurrentWeatherResonse struct {
 	Location struct {
 		Name    string `json:"name"`
 		Country string `json:"country"`
@@ -31,7 +31,7 @@ func (w WeatherClient) current() string {
 	response, _ := http.Get(url)
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
-	weatherResponse := WeatherResonse{}
+	weatherResponse := CurrentWeatherResonse{}
 	json.Unmarshal(body, &weatherResponse)
 	return fmt.Sprintf("It is %g degrees but feels like %g. A %s wind is blowing in a speed of %g KPH.\nHave a nice day", weatherResponse.Current.TempC, weatherResponse.Current.FeelsLikeC, weatherResponse.Current.WindDir, weatherResponse.Current.WindKPH)
 }

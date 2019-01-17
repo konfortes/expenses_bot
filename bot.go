@@ -25,7 +25,7 @@ func initBot() (*Bot, error) {
 		return nil, errors.Wrap(err, "error creating bot instance")
 	}
 
-	bot.Debug = true
+	// bot.Debug = true
 
 	webhookURL, _ := url.Parse(fmt.Sprintf("%s/%s", os.Getenv("WEBHOOK_URL"), bot.Token))
 	_, err = bot.SetWebhook(tgbotapi.WebhookConfig{URL: webhookURL})
@@ -69,12 +69,37 @@ func (bot Bot) handleUpdate(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 	switch update.Message.Command() {
 	case "expense":
-		msg.Text = "what did you spent your money on?"
+		msg.Text = "how would you categorize this expense?"
+		msg.ReplyMarkup = newCategoriesKeyboard()
 	case "weather":
 		msg.Text = weatherClient.current()
+	case "test":
+
 	default:
 		msg.Text = "I only understand predefined commands. press the '/' button"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 	}
 	msg.ReplyToMessageID = update.Message.MessageID
+
 	bot.Send(msg)
+}
+
+func newCategoriesKeyboard() tgbotapi.ReplyKeyboardMarkup {
+	var keyboard [][]tgbotapi.KeyboardButton
+
+	keyboard = append(keyboard, tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("Bills"),
+		tgbotapi.NewKeyboardButton("Food"),
+		tgbotapi.NewKeyboardButton("Transportation"),
+	),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("Pleasure"),
+			tgbotapi.NewKeyboardButton("Vacation"),
+			tgbotapi.NewKeyboardButton("Misc."),
+		))
+
+	return tgbotapi.ReplyKeyboardMarkup{
+		ResizeKeyboard: true,
+		Keyboard:       keyboard,
+	}
 }
