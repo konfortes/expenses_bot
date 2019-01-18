@@ -24,9 +24,10 @@ func initBot() error {
 		return errors.Wrap(err, "error creating bot instance")
 	}
 
-	// bot.Debug = true
+	bot.Debug = true
 
 	webhookURL, _ := url.Parse(fmt.Sprintf("%s/%s", os.Getenv("WEBHOOK_URL"), bot.Token))
+	fmt.Println("webhook url: ", webhookURL)
 	_, err = bot.SetWebhook(tgbotapi.WebhookConfig{URL: webhookURL})
 	if err != nil {
 		return errors.Wrap(err, "error setting web hook")
