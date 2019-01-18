@@ -6,7 +6,7 @@ require (
 	github.com/codegangsta/gin v0.0.0-20171026143024-cafe2ce98974 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/joho/godotenv v1.3.0
-	github.com/lib/pq v1.0.0 // indirect
+	github.com/lib/pq v1.0.0
 	github.com/mattn/go-shellwords v1.0.3 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
