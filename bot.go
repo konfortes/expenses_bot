@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"strconv"
@@ -31,13 +32,13 @@ func initBot() error {
 		return errors.Wrap(err, "error setting web hook")
 	}
 
-	// info, err := bot.GetWebhookInfo()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// if info.LastErrorDate != 0 {
-	// 	log.Printf("Telegram callback failed: %s", info.LastErrorMessage)
-	// }
+	info, err := bot.GetWebhookInfo()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if info.LastErrorDate != 0 {
+		log.Printf("Telegram callback failed: %s", info.LastErrorMessage)
+	}
 
 	myBot := &Bot{bot}
 	updates := bot.ListenForWebhook("/" + bot.Token)

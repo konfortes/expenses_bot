@@ -31,8 +31,9 @@ func main() {
 	}
 
 	weatherClient = WeatherClient{URL: os.Getenv("WEATHER_API_URL"), Key: os.Getenv("WEATHER_API_KEY")}
-	fmt.Println("listening on", os.Getenv("PORT"))
-	go http.ListenAndServe(fmt.Sprintf("localhost:%s", os.Getenv("PORT")), nil)
+	port := os.Getenv("PORT")
+	fmt.Println("listening on", port)
+	go http.ListenAndServe(fmt.Sprintf("localhost:%s", port), nil)
 	err := initBot()
 	if err != nil {
 		log.Fatal(err)
