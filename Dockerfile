@@ -11,8 +11,8 @@ RUN go mod download
  
 FROM build_base AS server_builder
 COPY . .
-RUN go build -o /tgbot_go
+RUN go build -o /expenses_go
  
 FROM alpine AS weaviate
-COPY --from=server_builder /tgbot_go /tgbot_go
-ENTRYPOINT ["/tgbot_go"]
+COPY --from=server_builder /expenses_go /expenses_go
+ENTRYPOINT ["/expenses_go"]
