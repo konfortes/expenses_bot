@@ -27,26 +27,25 @@ var weatherClient WeatherClient
 func main() {
 	app = &App{}
 	if err := app.init(); err != nil {
-		panic(err)
+		log.Fatalln("error initializing application: ", err)
 	}
 
 	weatherClient = WeatherClient{URL: os.Getenv("WEATHER_API_URL"), Key: os.Getenv("WEATHER_API_KEY")}
 
 	listenURL := fmt.Sprintf("localhost:%s", os.Getenv("PORT"))
 	fmt.Println("listening on", listenURL)
-	// TODO: why go?
+	// TODO: understand why go?
 	go http.ListenAndServe(listenURL, nil)
 
 	err := initBot()
 	if err != nil {
-		log.Fatal(err)
-		panic("error initializing bot")
+		log.Fatalln("error initializing bot: ", err)
 	}
 
 }
 
 func handlePanic() {
 	if r := recover(); r != nil {
-		log.Fatal("panic: ", r)
+		log.Print("panic: ", r)
 	}
 }

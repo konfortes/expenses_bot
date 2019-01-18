@@ -35,7 +35,7 @@ func initBot() error {
 
 	info, err := bot.GetWebhookInfo()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	if info.LastErrorDate != 0 {
 		log.Printf("Telegram callback failed: %s", info.LastErrorMessage)
@@ -67,7 +67,9 @@ func (bot Bot) handleUpdate(update tgbotapi.Update) {
 		command := strings.Split(update.Message.Text, " ")
 		amount, _ := strconv.ParseFloat(command[1], 32)
 		description := strings.Join(command[2:], " ")
-		persistExpense(float32(amount), description, update.Message.From.ID)
+		if err := persistExpense(float32(amount), description, update.Message.From.ID); err != nil {
+			log.Println("error persisting expense: ", err)
+		}
 
 		msg.Text = "how would you categorize this expense?"
 		msg.ReplyMarkup = newCategoriesKeyboard()
