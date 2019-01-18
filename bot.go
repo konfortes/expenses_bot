@@ -51,6 +51,8 @@ func initBot() error {
 	return nil
 }
 
+var ongoingExpenseReport = make(map[int]*Expense)
+
 func (bot Bot) handleUpdate(update tgbotapi.Update) {
 	// TODO: this does not work. app crashes
 	defer handlePanic()
@@ -64,24 +66,46 @@ func (bot Bot) handleUpdate(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 	switch update.Message.Command() {
 	case "expense":
+		expense := Expense{}
 		command := strings.Split(update.Message.Text, " ")
 		amount, _ := strconv.ParseFloat(command[1], 32)
-		description := strings.Join(command[2:], " ")
-		if err := persistExpense(float32(amount), description, update.Message.From.ID); err != nil {
-			log.Println("error persisting expense: ", err)
-		}
+		expense.Amount = float32(amount)
+		expense.Description = strings.Join(command[2:], " ")
+		expense.UserID = update.Message.From.ID
+		ongoingExpenseReport[expense.UserID] = &expense
 
 		msg.Text = "how would you categorize this expense?"
 		msg.ReplyMarkup = newCategoriesKeyboard()
 	case "weather":
 		msg.Text = weatherClient.current()
 	default:
-		msg.Text = "I only understand predefined commands. press the '/' button"
-		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
+		expense := ongoingExpenseReport[update.Message.From.ID]
+		if expense != nil {
+			if validCategory(update.Message.Text) {
+				expense.Category = update.Message.Text
+				if err := persistExpense(expense); err != nil {
+					log.Println("error persisting expense: ", err)
+				}
+				msg.Text = "expense persisted successfully"
+			} else {
+				msg.Text = "unrecognized category. expense could not be persisted"
+			}
+			delete(ongoingExpenseReport, update.Message.From.ID)
+		}
+		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 	}
 
 	msg.ReplyToMessageID = update.Message.MessageID
 	bot.Send(msg)
+}
+
+func validCategory(category string) bool {
+	for _, c := range []string{"Bills", "Food", "Transportation", "Pleasure", "Vacation", "Misc."} {
+		if c == category {
+			return true
+		}
+	}
+	return false
 }
 
 func newCategoriesKeyboard() tgbotapi.ReplyKeyboardMarkup {
@@ -99,7 +123,8 @@ func newCategoriesKeyboard() tgbotapi.ReplyKeyboardMarkup {
 		))
 
 	return tgbotapi.ReplyKeyboardMarkup{
-		ResizeKeyboard: true,
-		Keyboard:       keyboard,
+		ResizeKeyboard:  true,
+		Keyboard:        keyboard,
+		OneTimeKeyboard: true,
 	}
 }
