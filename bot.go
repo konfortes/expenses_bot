@@ -92,7 +92,6 @@ func (bot Bot) handleUpdate(update tgbotapi.Update) {
 			}
 			delete(ongoingExpenseReport, update.Message.From.ID)
 		}
-		// msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(false)
 	}
 
 	msg.ReplyToMessageID = update.Message.MessageID
